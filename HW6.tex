@@ -1,0 +1,53 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\begin{document}
+$
+I \in Addr \\
+v \in Val = Z + Addr \\
+\sigma \in Env = Var \mapsto Addr \\
+M \in Store = Addr \mapsto Val \\
+$
+
+$1\\ \sigma , M \vdash n \implies  n , M \\
+2\\ \underline{
+               \sigma , M \vdash e_1 \implies  v_1 , M_1 \;
+               \sigma , M_1 \vdash e_2 \implies  v_2 , M_2
+              }\\
+    \sigma , M \vdash e_1 + e_2 \implies  v_1 + v_2 , M_2 \\
+3\\ \sigma , M \vdash x \implies  M(\sigma(x)) , M \\
+4\\ \sigma , M \vdash *x  \implies  M(M(\sigma(x))) , M \\
+5\\ \sigma , M \vdash \&x \implies  \sigma(x) , M \\
+6\\ \text{Definition of the new-addr function:}\\
+  \underline{
+               na \in Addr : 
+               \forall <l, v> \in M, l \in \text{Addr}, v \in \text{Val}, M(l) = v : l \neq na
+              }\\
+    \sigma , M \vdash \text{new-address} \implies  na, M \\
+    \underline{
+               \sigma , M \vdash e_1 \implies  v_1 , M_1 \;
+               M_1 \vdash \text{new-address} \implies na , M_1 \;
+               \sigma[x \mapsto na], M_1[na \mapsto v_1] \vdash e_2 \implies v_2, M_2
+              }\\
+    \sigma , M \vdash let x = e_1\: in\: e_2 \implies  v_2, M_2 \\
+7\\ \underline{
+               \sigma , M \vdash e_1 \implies  v_1 , M_1 \;
+               \sigma , M_1 \vdash e_2 \implies  v_2 , M_2
+              }\\
+    \sigma , M \vdash e_1\: ;\: e_2 \implies  v_2 , M_2 \\
+8\\ \underline{
+               \sigma , M \vdash e \implies  v_1 , M_1
+              }\\
+    \sigma , M \vdash x\: := \: e \implies  v_1 , M_1[\sigma(x) \mapsto v_1] \\
+    \text{assignment returns right hand side value}\\
+9\\ \underline{
+               \sigma , M \vdash e \implies  v_1 , M_1
+              }\\
+    \sigma , M \vdash \*x\: := \: e \implies  v_1 , M_1[M_1(\sigma(x)) \mapsto v_1] \\
+    \text{assignment returns right hand side value}\\
+$\end{document}

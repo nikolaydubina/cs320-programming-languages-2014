@@ -1,0 +1,79 @@
+Hello,
+
+I am sorry to distract you on pre-final week, but I found few tests in HW9 somewhat incorrect. Please, find a moment to review it.
+
+First, tests at lines 694 and 689 are identical, so they should not be counted as two errors:
+
+original:
+(test (typecheck (try1 (pair (throw) (num 42)) (pair (bool false) (throw))) (mtEnv)) (crossT (boolT) (numT))) : 689
+(test (typecheck (try1 (pair (throw) (num 42)) (pair (bool false) (throw))) (mtEnv)) (crossT (boolT) (numT))) : 694
+
+However, I agree that my code have a bug in here.
+(exception (typecheck (try1 (pair (throw) (num 42)) (pair (bool false) (throw))) (mtEnv)) "typecheck: no type: #<procedure:try129> not expressions types mismatch" (crossT (boolT) (numT)) "at line 694")
+(exception (typecheck (try1 (pair (throw) (num 42)) (pair (bool false) (throw))) (mtEnv)) "typecheck: no type: #<procedure:try129> not expressions types mismatch" (crossT (boolT) (numT)) "at line 689")
+
+Next six errors I find incorrect.
+
+Since type of argument to both expressions is exception, and it(this argument) was used in body, type of whole expression should be anyT (i.e. throwing an exception).
+1. (bad (typecheck (eq (num 2) (throw)) (mtEnv)) (anyT) (boolT) "at line 652")
+2. (bad (typecheck (sub (throw) (throw)) (mtEnv)) (anyT) (numT) "at line 679")
+
+Even though "user defined" value of identifer as numTE, actual expression of it is exception - anyT,
+and it was used in body, therefore type of whole expression should be anyT.
+3. (bad (typecheck 
+	(with 
+		(list (quote x)) 
+		(list (numTE))
+		(list (throw))
+		(id (quote x)))
+		(mtEnv)) (anyT) (numT) "at line 667")
+
+This function consisting only of one "add" expression, one argument of which(speaking of "add") is
+exception(i.e. whole body of function is exception - anyT), therefore type of applyting this function should be exception - anyT.
+4. (bad (typecheck 
+	(app 
+		(fun (list (quote a)) (list (numTE))
+			(add (throw) (num 10)))
+		(list (throw))
+	) (mtEnv)) (anyT) (numT) "at line 687")
+
+
+Condition parameter of "ifthenelse" expression is evalueted always, therefore if it throws an exception,
+whole "ifthenelse" expression throws an exception, which means that: if "condition" is of type anyT,
+then whole "ifthenelse" is of type anyT
+5. (bad (typecheck 
+	(ifthenelse 
+		(throw) 
+		(pair (throw) (num 42)) 
+		(pair (bool false) (throw))
+	) (mtEnv)) (anyT) (crossT (boolT) (numT)) "at line 693")
+
+Since type of argument to "apps" is "throwing an exception"  and it was used in body, type of whole expression should be anyT.
+6. (bad (typecheck 
+	(with 
+		(list (quote dup)) 
+		(list (arrowTE (list (numTE)) (crossTE (numTE) (numTE))))
+		(list (fun (list (quote n)) (list (numTE)) (pair (id (quote n)) (id (quote 	n)))))
+		(app (id (quote dup)) (list (throw)))
+	)
+	(mtEnv)) (anyT) (crossT (numT) (numT)) "at line 697")
+
+However, I do agree that following four errors are due to my mistakes.
+
+(bad (typecheck (app (throw) (list (add (bool true) (throw)))) (mtEnv)) (anyT) "no type" "at line 698")
+(bad (typecheck (app (throw) (list (ifthenelse (num 1) (num 2) (num 3)))) (mtEnv)) (anyT) "no type" "at line 699")
+(bad (typecheck (app (throw) (list (app (bool true) (list (throw))))) (mtEnv)) (anyT) "no type" "at line 700")
+
+(exception (typecheck 
+	(ifthenelse (bool true)
+		(fun (list (quote x) (quote y)) (list (numTE) (numTE)) (throw))
+		(fun (list (quote z) (quote a)) (list (numTE) (numTE)) (add (id (quote z)) (id (quote a))))
+	) 
+	(mtEnv)) "typecheck: no type: #<procedure:ifthenelse25> not e1 type != e2 type" (arrowT (list (numT) (numT)) (numT)) "at line 683")
+
+
+
+In total, number of errors in my homework should be equal to 5 rather than 12.
+
+Thanks,
+Mykola (20121103) (system id: ragecucumber)
